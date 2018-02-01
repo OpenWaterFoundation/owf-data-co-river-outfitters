@@ -1,0 +1,11 @@
+# Convert river outfitter data from Excel to geojson format.
+#
+StartLog(LogFile="xlsx-to-geojson.TSTool.log")
+#
+#  TSTool is used because it automates the process.
+#  Filter out rows with empty RiverOutfitterName in case there are extra rows.
+SetDebugLevel(LogFileLevel=1)
+ReadTableFromExcel(TableID="Outfitters",InputFile="..\data\Colorado-River-Outfitters.xlsx",Worksheet="RiverOutfitter",ExcelColumnNames=FirstRowInRange,ColumnExcludeFilters="RiverOutfitterName:",ExcelIntegerColumns="Business_ZipCode",ExcelDateTimeColumns="Formation_Date",ExcelTextColumns="Municipality_DOLA_LG_ID,GNIS_ID_CSV,BusinessEntity_ID,ROL_ID")
+SetDebugLevel(ScreenLevel=0,LogFileLevel=0)
+WriteTableToGeoJSON(TableID="Outfitters",OutputFile="..\data\Colorado-River-Outfitters.geojson",LongitudeColumn="Longitude",LatitudeColumn="Latitude")
+#

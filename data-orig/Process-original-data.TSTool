@@ -1,0 +1,26 @@
+# This command file processes data downloaded from websites into useful formats to be
+# incorporated into the Colorado River Outfitters dataset.  The data are either directly accessed using the WebGet()
+# command or had to first be manually downloaded in .csv format.
+#
+# NOTE THAT THIS IS A WORK IN PROGRESS.  MORE COMMANDS WILL BE ADDED AS THE PROCESS IS FULLY STANDARDIZED.
+#
+# BusinessEntity_IDs
+# From the Business Entities in Colorado dataset from the Colorado Information Marketplace
+# Read in CSV file
+ReadTableFromDelimitedFile(TableID="Business-Entities-Orig",InputFile="Business-Entities-in-Colorado-Original.csv",Delimiter=",",HeaderLines="1",DateTimeColumns="entityformdate",TextColumns="entityid")
+#
+# Copy table to keep only the necessary columns and rename some columns
+CopyTable(TableID="Business-Entities-Orig",NewTableID="Business-Entities",IncludeColumns="entityid,entityname,principaladdress1,principalcity,principalstate,principalzipcode,entityformdate",ColumnMap="entityid:BusinessEntity_ID,principaladdress1:Physical_Address,principalcity:Municipality,principalstate:State,principalzipcode:ZipCode,entityformdate:Formation_Date",ColumnExcludeFilters="entityname:*Dissolved*")
+SortTable(TableID="Business-Entities",SortColumns="entityname")
+#
+# Read in Colorado-River-Outfitters.xlsx dataset to match RiverOutfitterName to entityname
+ReadTableFromExcel(TableID="Outfitters",InputFile="..\data\Colorado-River-Outfitters.xlsx",Worksheet="RiverOutfitter",ExcelAddress="a1:b190",ExcelColumnNames=FirstRowInRange,ExcelTextColumns="ROL_ID")
+#
+# Join tables based on name
+JoinTables(TableID="Outfitters",TableToJoinID="Business-Entities",JoinColumns="RiverOutfitterName:entityname")
+DeleteTableColumns(TableID="Outfitters",DeleteColumns="entityname")
+#
+# Export joined table to CSV; note that this only gives BusinessEntity IDs for some outfitters due to misspelling of names or
+# if the outfitter was not in the original dataset due to limitations in filtering data
+WriteTableToDelimitedFile(TableID="Outfitters",OutputFile="Business-Entities-in-Colorado.csv",WriteHeaderComments=False,NaNValue="Blank")
+#
